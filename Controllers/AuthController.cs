@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Asp.Versioning;
 using HPParkingAPI.Models.DTOs.Auth;
 using HPParkingAPI.Services.Auth;
@@ -84,9 +85,16 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ChangePassword(
         string id, [FromBody] ChangePasswordDto dto)
     {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isSuperAdmin = User.IsInRole("SuperAdmin");
+
+        if (currentUserId != id && !isSuperAdmin)
+            return Forbid();
+
         var success = await _authService.ChangePasswordAsync(id, dto.CurrentPassword, dto.NewPassword);
         if (!success)
             return BadRequest(new { message = "Mat khau hien tai khong dung." });
@@ -104,6 +112,20 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> DeactivateUser(string id)
     {
         var success = await _authService.DeactivateUserAsync(id);
+        if (!success) return NotFound(new { message = "Khong tim thay nguoi dung." });
+        return NoContent();
+    }
+
+    /// <summary>Kich hoat lai tai khoan (SuperAdmin only)</summary>
+    [HttpPost("users/{id}/reactivate")]
+    [Authorize(Roles = "SuperAdmin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ReactivateUser(string id)
+    {
+        var success = await _authService.ReactivateUserAsync(id);
         if (!success) return NotFound(new { message = "Khong tim thay nguoi dung." });
         return NoContent();
     }

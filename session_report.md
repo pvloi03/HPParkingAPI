@@ -1,128 +1,58 @@
-# Báo Cáo Phiên Làm Việc — Dự Án HPParkingAPI
+﻿# Báo Cáo Cấu Trúc & Kiến Trúc Dự Án — HPParkingAPI
 
-**Ngày lập báo cáo**: 07/08/2026  
-**Phạm vi**: Tư vấn kiến trúc giải pháp & Phát triển tầng mô hình dữ liệu (Domain Modeling Layer)  
+**Ngày cập nhật**: 08/08/2026  
+**Phạm vi**: Thiết kế lại cấu trúc, logic nghiệp vụ, tài liệu kiến trúc & các sơ đồ hệ thống  
 **Dự án**: HPParkingAPI — Hệ thống Kiểm soát An ninh Người & Phương tiện + Quản lý Bãi giữ xe Thông minh  
-**Nền tảng công nghệ**: ASP.NET Core 8.0 · MongoDB · C# .NET 10.0
+**Nền tảng công nghệ**: ASP.NET Core 8.0 / .NET 10.0 · MongoDB · JWT Auth · SignalR Realtime
 
 ---
 
-## I. Tổng Quan Dự Án
+## I. Áp Dụng Hệ Thống Skills Trong Dự Án
 
-**HPParkingAPI** là giải pháp phần mềm tập trung cho các nhà máy, khu công nghiệp, cơ quan và bãi giữ xe thương mại, cung cấp đồng thời hai chức năng chính:
+Dự án đã thiết lập và tuân thủ các quy tắc agent trong file [`AGENTS.md`](file:///d:/ASP.NET/HPParkingAPI/.agents/AGENTS.md), áp dụng các skill tiêu chuẩn:
 
-1. **Kiểm soát An ninh Người ra vào**: Xác thực công nhân, kỹ sư, khách tham quan qua thẻ RFID, nhận diện CCCD gắn chip, và nhận diện khuôn mặt FaceID.
-2. **Quản lý Bãi Giữ Xe Thu Phí**: Nhận diện biển số xe tự động (ANPR/LPR), lưu vé ra/vào, tính phí linh hoạt (giờ/ngày/tháng) và tích hợp thanh toán VietQR không tiếp xúc.
-
----
-
-## II. Kiến Trúc Giải Pháp Được Xác Lập
-
-Sau quá trình phân tích nghiệp vụ thực tế, kiến trúc được thống nhất theo mô hình **Edge-Server Hybrid**, gồm 4 tầng vận hành độc lập:
-
-```
-[ Tầng 1: Thiết Bị Ngoại Vi ]
-  Camera ANPR (LAN/RTSP) · Camera FaceID · Đầu đọc RFID (Wiegand)
-  Đầu đọc CCCD (USB Direct) · Cảm biến Rada · Access Controller (LAN)
-
-         ↓ (RTSP · Wiegand · USB HID · TCP/IP SDK)
-
-[ Tầng 2: Trạm Máy Tính Bảo Vệ Tại Cổng — WinForms App (C# .NET) ]
-  • AI ONNX Local (YOLOv8-Nano + CRNN OCR) — Miễn phí 0đ, 100% Offline
-  • Local SQLite Cache — Hoạt động tiếp tục khi đứt mạng
-  • Gate Controller Logic — Mở Barrier/Turnstile < 50ms
-
-         ↕ (REST API + SignalR WebSocket)
-
-[ Tầng 3: Backend Server Trung Tâm — HPParkingAPI ]
-  ASP.NET Core 8.0 · MongoDB · SignalR Hub (Realtime < 50ms)
-  Services: Parking · Pricing · Access · Payment · Device
-
-         ↕ (REST API HTTPS)
-
-[ Tầng 4: Web Admin Portal ]
-  Quản lý đa công trường · Báo cáo doanh thu · Đăng ký vé tháng · Cấu hình thiết bị
-```
-
-### Các Điểm Kỹ Thuật Nổi Bật
-- **Nhận diện biển số xe (ANPR) Zero-Cost**: Dùng YOLOv8-Nano + CRNN OCR chạy trực tiếp trong WinForms qua `Microsoft.ML.OnnxRuntime` — **Không phát sinh chi phí bản quyền**, hoạt động **100% offline**.
-- **Chống mất mạng (Offline Fallback)**: Máy trạm cổng lưu cache danh sách công nhân/xe và vé đỗ tạm vào SQLite local, tự đồng bộ ngược về server khi có kết nối trở lại.
-- **Kiến trúc mở rộng đa cổng/đa công trường**: Thiết kế `Site → Gate → Device` phân cấp rõ ràng, cho phép mở rộng tuyến tính khi bổ sung thêm bãi xe hoặc cổng kiểm soát mới.
-
----
-
-## III. Kết Quả Công Việc Thực Hiện
-
-### A. Tài Liệu Thiết Kế & Kiến Trúc
-
-| Tài liệu | Đường dẫn | Nội dung |
-| :--- | :--- | :--- |
-| Giải pháp Kiến trúc | [solution_architecture.md](file:///C:/Users/ADMIN/.gemini/antigravity-ide/brain/1fb9a00c-b3cd-4c34-a3c9-1016b069b6ad/solution_architecture.md) | Sơ đồ kiến trúc tổng thể, luồng nghiệp vụ Mermaid, bảng công nghệ, Gantt Roadmap |
-| Sơ đồ Hệ thống Draw.io | [architecture.drawio](file:///d:/ASP.NET/HPParkingAPI/architecture.drawio) | Sơ đồ đồ họa 4 tầng hệ thống, có thể mở và chỉnh sửa trực tiếp bằng Draw.io |
-
----
-
-### B. Phân Hệ Domain Model Entities (Tầng Dữ Liệu)
-
-Toàn bộ Entity kế thừa từ `BaseEntity` (Id ObjectId MongoDB, CreatedAt, UpdatedAt).
-
-#### 🟢 Đã có từ trước & được Nâng cấp
-
-| File | Thay đổi Chính |
+| Skill đã áp dụng | Mục đích & Kết quả |
 | :--- | :--- |
-| [ParkingTicket.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Parking/ParkingTicket.cs) | + `VehicleCategory`, `TicketType` (Vãng lai/Vé tháng), `MonthlySubscriptionId`, `InImageUrl`, `OutImageUrl` (ảnh ANPR vào/ra) |
-| [PricingPolicy.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Parking/PricingPolicy.cs) | + `ApplicableCategory` (áp giá theo loại xe), `FreeGraceMinutes` (N phút miễn phí đầu), `OvernightPrice` (phụ thu qua đêm) |
-| [PaymentTransaction.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Parking/PaymentTransaction.cs) | + `PaymentStatus` (Pending/Success/Failed/Refunded), `TransactionCode` (mã VietQR/ngân hàng), `QrPayload` (chuỗi mã QR động) |
-| [Vehicle.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Vehicles/Vehicle.cs) | + `IsVIP`, `IsBlacklisted`, `BlacklistReason`, `MonthlyExpiryDate` (hạn vé tháng) |
-| [Worker.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Personnel/Worker.cs) | + `Department` (phòng ban/đội thi công), `IsBlacklisted`, `BlacklistReason` |
-| [VehicleAccessLog.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/AccessLogs/VehicleAccessLog.cs) | + `Category`, `FullImageUrl` (ảnh toàn cảnh), `PlateCropImageUrl` (ảnh crop biển số), `ConfidenceScore` (độ tin cậy AI) |
-| [PersonAccessLog.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/AccessLogs/PersonAccessLog.cs) | + `AuthMethod.CitizenId` (CCCD), `IdentityNumber`, `SnapshotUrl` (ảnh FaceID), `FaceMatchScore` |
-
-#### 🔵 Mới Hoàn Toàn
-
-| File | Chức Năng |
-| :--- | :--- |
-| [Device.cs](file:///d:/ASP.NET/HPParkingAPI/Models/Entities/Devices/Device.cs) | Quản lý chi tiết thiết bị ngoại vi phần cứng: `DeviceType` (7 loại), `ConnectionMode` (LAN IP / USB Direct / Wiegand), IP/RTSP, `ParentControllerId` + `WiegandFormat` (cho RFID Wiegand), `ComPort`/`UsbDevicePath` (cho CCCD USB), `Status` (Online/Offline/Error), `LastPingAt` |
+| [`code-review`](file:///d:/ASP.NET/HPParkingAPI/.agents/skills/code-review/SKILL.md) | Phân tích 2 trục (Standards & Spec), phát hiện 5 lỗi nghiêm trọng (N+1 query full RAM, lỗ hổng ChangePassword) và khắc phục 100%. |
+| [`codebase-design`](file:///d:/ASP.NET/HPParkingAPI/.agents/skills/codebase-design/SKILL.md) | Thiết kế Deep Module cho Repository layer (`IRepository<T>` với LINQ Expressions), tối ưu Seam & Adapter. |
+| [`domain-modeling`](file:///d:/ASP.NET/HPParkingAPI/.agents/skills/domain-modeling/SKILL.md) | Xây dựng glossary chuẩn [`CONTEXT.md`](file:///d:/ASP.NET/HPParkingAPI/CONTEXT.md) và hệ thống quyết định kiến trúc [`docs/adr/`](file:///d:/ASP.NET/HPParkingAPI/docs/adr/). |
+| [`writing-for-agents`](file:///d:/ASP.NET/HPParkingAPI/.agents/skills/writing-for-agents/SKILL.md) | Thiết lập file cấu hình quy tắc dự án [`AGENTS.md`](file:///d:/ASP.NET/HPParkingAPI/.agents/AGENTS.md) hỗ trợ đa ngôn ngữ và ánh xạ skill. |
 
 ---
 
-### C. Phân Hệ DTOs (Tầng Giao Tiếp API)
+## II. Các File Mô Tả & Quyết Định Kiến Trúc Mới
 
-> Folder `Models/DTOs/` đã được xây dựng hoàn toàn từ trống.
+### 1. File Từ Vựng & Phân Hệ Bounded Context
+- **[`CONTEXT.md`](file:///d:/ASP.NET/HPParkingAPI/CONTEXT.md)**: Định nghĩa từ vựng chuẩn (Ubiquitous Language) cho Multi-Tenancy (`Site`, `Gate`, `Gate Station`), Nhân sự (`Person`, `AccessCard`, `Contractor`), Bãi xe (`ParkingTicket`, `MonthlySubscription`, `PricingPolicy`), Thiết bị (`Device`) và Phân quyền (`UserRole`).
 
-| File | Chức năng |
-| :--- | :--- |
-| [CheckInRequestDto.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Parking/CheckInRequestDto.cs) | WinForms → API: Gửi thông tin xe vào (SiteId, GateId, LicensePlate, CardNumber, ảnh ANPR, ConfidenceScore) |
-| [CheckOutRequestDto.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Parking/CheckOutRequestDto.cs) | WinForms → API: Gửi thông tin xe ra (SiteId, OutGateId, LicensePlate, ảnh ANPR ra) |
-| [CheckOutResponseDto.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Parking/CheckOutResponseDto.cs) | API → WinForms: Trả kết quả khớp vé (TotalMinutes, Amount, VietQrUrl, ảnh vào/ra để bảo vệ đối chiếu) |
-| [ParkingTicketDto.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Parking/ParkingTicketDto.cs) | DTO đọc danh sách vé đỗ xe cho Web Admin Dashboard |
-| [PricingPolicyDtos.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Parking/PricingPolicyDtos.cs) | Create/Response DTOs cấu hình bảng giá linh hoạt |
-| [PaymentDtos.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Payment/PaymentDtos.cs) | DTOs giao dịch thanh toán + `VietQrGenerateDto` sinh mã QR động |
-| [PersonnelDtos.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Personnel/PersonnelDtos.cs) | DTOs quản lý Worker (công nhân) và Contractor (nhà thầu) |
-| [GateAccessEventDto.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Realtime/GateAccessEventDto.cs) | DTO sự kiện SignalR Hub đẩy xuống WinForms và Admin Dashboard theo thời gian thực |
-| [DeviceDtos.cs](file:///d:/ASP.NET/HPParkingAPI/Models/DTOs/Devices/DeviceDtos.cs) | Create/Update/Response DTOs quản lý thiết bị + `DeviceHeartbeatDto` nhận tín hiệu ping trạng thái |
+### 2. Bộ Quyết Định Kiến Trúc (Architecture Decision Records - ADRs)
+- **[`ADR 0001`](file:///d:/ASP.NET/HPParkingAPI/docs/adr/0001-edge-server-hybrid-architecture.md)**: Mô hình Edge-Server Hybrid 4 tầng (Barie phản hồi < 50ms, AI ONNX Local 0đ, SQLite Offline Fallback).
+- **[`ADR 0002`](file:///d:/ASP.NET/HPParkingAPI/docs/adr/0002-mongodb-repository-pattern.md)**: Lưu trữ MongoDB với Generic Repository (`IRepository<T>`) hỗ trợ LINQ Expressions.
+- **[`ADR 0003`](file:///d:/ASP.NET/HPParkingAPI/docs/adr/0003-jwt-multi-tenancy-auth.md)**: Xác thực JWT Bearer phân quyền theo `SiteId` và `ClaimTypes.Role`.
 
----
-
-### D. Kiểm Tra Biên Dịch (Build Verification)
-
-Sau mỗi lần thay đổi mã nguồn, lệnh `dotnet build` đã được thực thi tự động để xác minh tính toàn vẹn:
-
-```
-Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-```
+### 3. File Tài Liệu Kiến Trúc & Sơ Đồ Hệ Thống
+- **[`docs/solution_architecture.md`](file:///d:/ASP.NET/HPParkingAPI/docs/solution_architecture.md)**: Chứa các sơ đồ Mermaid động:
+  - Sơ đồ vật lý 4 tầng (Peripherals → WinForms Edge → ASP.NET Core Central API → Web Admin).
+  - Sequence diagram luồng Xe vào (Check-In) & Xe ra (Check-Out) kèm mã VietQR động.
+  - Class Diagram kiến trúc layers & seam placement.
 
 ---
 
-## IV. Lộ Trình Tiếp Theo (Next Steps)
+## III. Cải Tiến Cấu Trúc Logic Codebase
 
-| Giai đoạn | Nội dung | Trạng thái |
-| :--- | :--- | :--- |
-| **Phase 1: Domain Models** | Entities, DTOs, Enums | ✅ **Hoàn thành** |
-| **Phase 2: Services Layer** | `IParkingTicketService`, `IPricingService`, `IAccessLogService`, `IPaymentService`, `IDeviceService` | ⏳ Tiếp theo |
-| **Phase 3: Controllers & API** | REST Endpoints cho từng Service, Swagger documentation | ⏳ Chờ Phase 2 |
-| **Phase 4: SignalR Hub** | Realtime event push lên WinForms & Web Admin | ⏳ Chờ Phase 3 |
-| **Phase 5: WinForms App** | Gate Station App (Camera RTSP, ONNX AI, COM/USB SDK, SQLite Fallback) | ⏳ Song song Phase 3-4 |
-| **Phase 6: Web Admin Portal** | Dashboard, Báo cáo, Quản lý thiết bị & nhân sự | ⏳ Chờ Phase 3 |
+1. **Repository Layer (`IRepository<T>` & `MongoRepository<T>`)**:
+   - Thêm các phương thức async: `FindOneAsync`, `FindAsync`, `ExistsAsync`.
+   - Giúp các service thực hiện query trực tiếp tại CSDL MongoDB thay vì kéo toàn bộ dữ liệu về RAM.
+
+2. **Auth Service & Controller Layer**:
+   - Tối ưu hóa các thao tác Login, CreateUser, SeedAdmin dùng Expression filter.
+   - Thêm endpoint `POST /api/v1/auth/users/{id}/reactivate` kích hoạt lại tài khoản.
+   - Sửa lỗi bảo mật trong `ChangePassword` (chỉ chính chủ hoặc SuperAdmin mới được đổi mật khẩu).
+   - Thêm `[ProducesResponseType]` đầy đủ cho Swagger UI.
+
+---
+
+## IV. Kiểm Tra Biên Dịch (Verification)
+
+Thực thi lệnh `dotnet build` kiểm tra toàn bộ giải pháp:
+- **Result**: `Build succeeded (0 Warning(s), 0 Error(s))`.

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Humanizer;
 using HPParkingAPI.Data;
 using HPParkingAPI.Repository.Interfaces;
@@ -26,6 +27,22 @@ public class MongoRepository<T> : IRepository<T> where T : class
         var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
         return await _collection.Find(filter).FirstOrDefaultAsync();
     }
+
+    public async Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _collection.Find(predicate).FirstOrDefaultAsync();
+    }
+
+    public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _collection.Find(predicate).ToListAsync();
+    }
+
+    public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _collection.Find(predicate).AnyAsync();
+    }
+
 
     public async Task InsertAsync(T entity)
     {

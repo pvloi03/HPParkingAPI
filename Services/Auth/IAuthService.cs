@@ -10,5 +10,6 @@ public interface IAuthService
     Task<UserResponseDto?> GetUserByIdAsync(string id);
     Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword);
     Task<bool> DeactivateUserAsync(string userId);
+    Task<bool> ReactivateUserAsync(string userId);
     Task SeedInitialAdminAsync();
 }
