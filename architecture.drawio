@@ -1,0 +1,129 @@
+<mxfile host="Electron" modified="2026-08-07T21:35:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="HPParkingArchitecture" name="HPParking System Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Swimlane 1: Hardware Layer -->
+        <mxCell id="group_hardware" value="1. Tầng Thiết Bị Ngoại Vi (Hardware &amp; Edge Sensors)" style="swimlane;startSize=30;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;align=center;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="320" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="node_cam_anpr" value="📷 IP Camera ANPR&#xa;(Đọc biển số xe)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="50" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_cam_face" value="👤 Camera FaceID&#xa;(Nhận diện / Chấm công)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="130" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_cccd" value="🆔 Đầu Đọc CCCD Gắn Chip&#xa;(Giao tiếp USB / Serial)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="210" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_rfid" value="💳 Đầu Đọc Thẻ RFID&#xa;(Chuẩn Wiegand / RS485)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="290" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_radar" value="🛰️ Cảm Biến Rada / Loop Detector&#xa;(Phát hiện có xe đè)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="370" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_barrier" value="🚧 Access Controller / Relay Box&#xa;(Điều khiển Barrier &amp; Cổng Turnstile)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" vertex="1" parent="group_hardware">
+          <mxGeometry x="20" y="470" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane 2: WinForms Edge Station -->
+        <mxCell id="group_edge" value="2. Máy Trạm Bảo Vệ Tại Cổng (WinForms Edge Client)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;align=center;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="340" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="node_winforms" value="🖥️ WinForms Guard App (C# .NET)&#xa;-----------------------------------&#xa;• Đa màn hình Live Monitor Cam&#xa;• Tích hợp SDK Cổng COM / Serial / USB&#xa;• Bàn phím phím tắt (F1 mở barrier, Space...)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_edge">
+          <mxGeometry x="20" y="50" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="node_onnx" value="🧠 ONNX AI Engine (Miễn Phí 0đ)&#xa;-----------------------------------&#xa;• YOLOv8-Nano: Detect khung biển số&#xa;• CRNN / PaddleOCR: Đọc chuỗi ký tự&#xa;• Microsoft.ML.OnnxRuntime (100% Offline)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_edge">
+          <mxGeometry x="20" y="200" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="node_sqlite" value="💾 Local SQLite Cache&#xa;-----------------------------------&#xa;• Lưu danh sách công nhân / xe nội bộ&#xa;• Lưu vé đỗ tạm thời khi đứt mạng&#xa;• Tự đồng bộ (Sync) khi có kết nối lại" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_edge">
+          <mxGeometry x="20" y="340" width="300" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="node_edge_logic" value="⚡ Gate Controller Logic&#xa;-----------------------------------&#xa;• Bắt sự kiện quẹt thẻ / cảm biến&#xa;• Ra lệnh Relay mở Barrier tức thì (&lt;50ms)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_edge">
+          <mxGeometry x="20" y="480" width="300" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane 3: Central Backend API -->
+        <mxCell id="group_backend" value="3. Server Trung Tâm (ASP.NET Core Web API + MongoDB)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;align=center;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="40" width="420" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="node_api" value="🌐 HPParkingAPI (ASP.NET Core 8.0)&#xa;-----------------------------------&#xa;• RESTful APIs v1 (Asp.Versioning)&#xa;• Global Exception &amp; ProblemDetails Handler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;fontStyle=1;align=left;spacingLeft=10;" vertex="1" parent="group_backend">
+          <mxGeometry x="20" y="50" width="380" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="node_signalr" value="⚡ SignalR Hub (Realtime Event Push)&#xa;• Đẩy sự kiện xe / công nhân qua cổng trực tiếp &lt;50ms" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="group_backend">
+          <mxGeometry x="20" y="160" width="380" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="node_services" value="⚙️ Business Services Layer&#xa;-----------------------------------&#xa;• AccessLogService (Kiểm soát người &amp; Chấm công)&#xa;• ParkingTicketService (Khớp biển số &amp; Vé xe vào/ra)&#xa;• PricingPolicyService (Cấu hình giá giờ/ngày/tháng)&#xa;• PaymentService (Tạo mã VietQR tự động)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_backend">
+          <mxGeometry x="20" y="240" width="380" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="node_mongo" value="🍃 MongoDB Database (MongoDbContext)&#xa;-----------------------------------&#xa;• Collections: AccessLogs, ParkingTickets, Workers,&#xa;  Vehicles, Sites, Gates, PricingPolicies, Payments..." style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" vertex="1" parent="group_backend">
+          <mxGeometry x="20" y="420" width="380" height="150" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane 4: Admin Portal -->
+        <mxCell id="group_admin" value="4. Ban Quản Lý &amp; Kế Toán (Web Portal)" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;align=center;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="40" width="320" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="node_web_admin" value="🖥️ Web Admin Portal&#xa;(React / Vue / Blazor)&#xa;-----------------------------------&#xa;• Báo cáo lưu lượng &amp; Doanh thu&#xa;• Quản lý danh sách Công nhân &amp; Xe&#xa;• Đăng ký Vé tháng &amp; Nhà thầu&#xa;• Cấu hình Bãi xe, Cổng &amp; Giá vé" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=12;align=left;spacingLeft=10;" vertex="1" parent="group_admin">
+          <mxGeometry x="20" y="50" width="280" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="node_reports" value="📊 Report &amp; Export Engine&#xa;• Xuất báo cáo Excel / PDF&#xa;• Thống kê lượt xe theo ngày/tháng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=12;fontStyle=1;" vertex="1" parent="group_admin">
+          <mxGeometry x="20" y="240" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="node_mobile" value="📱 Mobile App Quản Lý&#xa;• Xem nhanh báo cáo &amp; Duyệt ngoại lệ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=12;fontStyle=1;" vertex="1" parent="group_admin">
+          <mxGeometry x="20" y="340" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Connections / Edges -->
+        <!-- Hardware to Edge WinForms -->
+        <mxCell id="edge_cam_win" value="RTSP Stream" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_cam_anpr" target="node_winforms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_face_win" value="SDK / Webhook" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_cam_face" target="node_winforms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_cccd_win" value="USB / Serial COM" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_cccd" target="node_winforms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_rfid_win" value="Wiegand/RS485" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_rfid" target="node_winforms">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- WinForms internal connections -->
+        <mxCell id="edge_win_onnx" value="Image Crop" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_winforms" target="node_onnx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_win_sqlite" value="Offline Sync" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_winforms" target="node_sqlite">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_win_logic" value="Trigger Events" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_winforms" target="node_edge_logic">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_logic_barrier" value="Relay Command Open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d79b00;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="node_edge_logic" target="node_barrier">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- WinForms to Backend API -->
+        <mxCell id="edge_win_api" value="REST API &amp; SignalR" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;strokeWidth=2.5;fontSize=11;fontStyle=1;" edge="1" parent="1" source="node_winforms" target="node_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Internal -->
+        <mxCell id="edge_api_services" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="node_api" target="node_services">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_services_mongo" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366;strokeWidth=2;" edge="1" parent="1" source="node_services" target="node_mongo">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Web Admin to API -->
+        <mxCell id="edge_admin_api" value="REST API (HTTPS)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6;strokeWidth=2.5;fontSize=11;fontStyle=1;" edge="1" parent="1" source="node_web_admin" target="node_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

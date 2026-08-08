@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace LearnApi.Common;
+namespace HPParkingAPI.Common;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
