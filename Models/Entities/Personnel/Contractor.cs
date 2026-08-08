@@ -1,4 +1,4 @@
-namespace LearnApi.Models.Entities.Personnel;
+namespace HPParkingAPI.Models.Entities.Personnel;
 
 public class Contractor : BaseEntity
 {

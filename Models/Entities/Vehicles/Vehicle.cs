@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace LearnApi.Models.Entities.Vehicles;
+namespace HPParkingAPI.Models.Entities.Vehicles;
 
 public enum VehicleCategory
 {
@@ -26,5 +26,13 @@ public class Vehicle : BaseEntity
 
     public string? OwnerName { get; set; }              // Tên tài xế / chủ xe
     public string? PhoneNumber { get; set; }            // SĐT tài xế
+
     public bool IsAllowedEntry { get; set; } = true;    // Trạng thái được phép vào
+    public bool IsVIP { get; set; } = false;            // Xe ưu tiên / Xe VIP (Miễn phí đỗ xe)
+    public bool IsBlacklisted { get; set; } = false;    // Xe trong danh sách đen / Cảnh báo an ninh
+    public string? BlacklistReason { get; set; }        // Lý do đưa vào danh sách đen
+
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+    public DateTime? MonthlyExpiryDate { get; set; }    // Ngày hết hạn vé tháng (nếu có)
 }
+

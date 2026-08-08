@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace LearnApi.Common;
+namespace HPParkingAPI.Common;
 
 public class ApiErrorResponse : ProblemDetails
 {

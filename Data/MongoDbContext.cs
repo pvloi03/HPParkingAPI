@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace LearnApi.Data;
+namespace HPParkingAPI.Data;
 
 public class MongoDbContext
 {

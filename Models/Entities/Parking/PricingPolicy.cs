@@ -1,7 +1,8 @@
+using HPParkingAPI.Models.Entities.Vehicles;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace LearnApi.Models.Entities.Parking;
+namespace HPParkingAPI.Models.Entities.Parking;
 
 public enum PricingType
 {
@@ -18,7 +19,12 @@ public class PricingPolicy : BaseEntity
     public string Name { get; set; } = null!;       // Ví dụ: "Bảng giá xe máy 2025"
 
     [BsonRepresentation(BsonType.String)]
+    public VehicleCategory ApplicableCategory { get; set; } = VehicleCategory.Motorbike; // Loại xe áp dụng
+
+    [BsonRepresentation(BsonType.String)]
     public PricingType PricingType { get; set; } = PricingType.Hourly;
+
+    public int FreeGraceMinutes { get; set; } = 0;          // Số phút miễn phí ban đầu (VD: dưới 10 phút miễn phí)
 
     // Tính theo giờ (Hourly)
     public decimal FirstBlockPrice { get; set; } = 0;      // Giá N giờ đầu (VD: 2 giờ đầu 10.000đ)
@@ -29,6 +35,8 @@ public class PricingPolicy : BaseEntity
     public decimal FlatPrice { get; set; } = 0;            // Giá cố định (vé ngày / vé tháng)
 
     public decimal MaxDailyPrice { get; set; } = 0;        // Mức trần tối đa trong ngày (nếu có)
+    public decimal OvernightPrice { get; set; } = 0;       // Phụ thu đỗ qua đêm
 
     public bool IsActive { get; set; } = true;
 }
+

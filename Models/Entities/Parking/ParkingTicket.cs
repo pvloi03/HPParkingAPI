@@ -1,13 +1,20 @@
+using HPParkingAPI.Models.Entities.Vehicles;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace LearnApi.Models.Entities.Parking;
+namespace HPParkingAPI.Models.Entities.Parking;
 
 public enum TicketStatus
 {
     Active = 1,     // Đang đỗ trong bãi
     Completed = 2,  // Đã ra + Đã thanh toán
     Cancelled = 3   // Huỷ (VD: xe nội bộ không tính tiền)
+}
+
+public enum TicketType
+{
+    Casual = 1,     // Vé vãng lai
+    Monthly = 2     // Vé tháng / Đăng ký cố định
 }
 
 public class ParkingTicket : BaseEntity
@@ -28,6 +35,18 @@ public class ParkingTicket : BaseEntity
     public string LicensePlate { get; set; } = null!; // Biển số xe
 
     [BsonRepresentation(BsonType.String)]
+    public VehicleCategory VehicleCategory { get; set; } = VehicleCategory.Motorbike; // Phân loại xe
+
+    [BsonRepresentation(BsonType.String)]
+    public TicketType TicketType { get; set; } = TicketType.Casual; // Loại vé (Vãng lai/Vé tháng)
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? MonthlySubscriptionId { get; set; } // ID Đăng ký vé tháng (nếu có)
+
+    public string? InImageUrl { get; set; }           // Ảnh chụp xe lúc vào (Camera ANPR)
+    public string? OutImageUrl { get; set; }          // Ảnh chụp xe lúc ra (Camera ANPR)
+
+    [BsonRepresentation(BsonType.String)]
     public TicketStatus Status { get; set; } = TicketStatus.Active;
 
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
@@ -40,3 +59,4 @@ public class ParkingTicket : BaseEntity
     public bool IsPaid { get; set; } = false;         // Đã thanh toán chưa
     public string? Note { get; set; }                 // Ghi chú
 }
+

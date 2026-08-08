@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace LearnApi.Models.Entities.Sites;
+namespace HPParkingAPI.Models.Entities.Sites;
 
 public enum GateType
 {

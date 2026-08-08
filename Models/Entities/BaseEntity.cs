@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace LearnApi.Models.Entities;
+namespace HPParkingAPI.Models.Entities;
 
 public abstract class BaseEntity
 {

@@ -1,10 +1,10 @@
 using Humanizer;
-using LearnApi.Data;
-using LearnApi.Repository.Interfaces;
+using HPParkingAPI.Data;
+using HPParkingAPI.Repository.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace LearnApi.Repository;
+namespace HPParkingAPI.Repository;
 
 public class MongoRepository<T> : IRepository<T> where T : class
 {
@@ -37,5 +37,19 @@ public class MongoRepository<T> : IRepository<T> where T : class
         var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
         var result = await _collection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
+    }
+
+    public async Task<bool> UpdateAsync(T entity)
+    {
+        // Doc Id tu property "Id" cua entity (la string ObjectId)
+        var idProp = typeof(T).GetProperty("Id");
+        if (idProp is null) return false;
+
+        var idValue = idProp.GetValue(entity)?.ToString();
+        if (string.IsNullOrEmpty(idValue)) return false;
+
+        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(idValue));
+        var result = await _collection.ReplaceOneAsync(filter, entity);
+        return result.ModifiedCount > 0;
     }
 }

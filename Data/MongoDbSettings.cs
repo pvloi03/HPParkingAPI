@@ -1,4 +1,4 @@
-namespace LearnApi.Data;
+namespace HPParkingAPI.Data;
 
 public class MongoDbSettings
 {
