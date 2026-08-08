@@ -23,9 +23,7 @@ public class AuthService : IAuthService
     // ===================== LOGIN =====================
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
     {
-        var users = await _userRepo.GetAllAsync();
-        var user = users.FirstOrDefault(u =>
-            u.Username == dto.Username && u.IsActive);
+        var user = await _userRepo.FindOneAsync(u => u.Username == dto.Username && u.IsActive);
 
         if (user is null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             return null;
@@ -52,8 +50,7 @@ public class AuthService : IAuthService
     // ===================== CREATE USER =====================
     public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
     {
-        var users = await _userRepo.GetAllAsync();
-        if (users.Any(u => u.Username == dto.Username))
+        if (await _userRepo.ExistsAsync(u => u.Username == dto.Username))
             throw new InvalidOperationException($"Ten dang nhap '{dto.Username}' da ton tai.");
 
         var user = new AppUser
@@ -111,11 +108,22 @@ public class AuthService : IAuthService
         return true;
     }
 
+    // ===================== REACTIVATE =====================
+    public async Task<bool> ReactivateUserAsync(string userId)
+    {
+        var user = await _userRepo.GetByIdAsync(userId);
+        if (user is null) return false;
+
+        user.IsActive = true;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userRepo.UpdateAsync(user);
+        return true;
+    }
+
     // ===================== SEED ADMIN =====================
     public async Task SeedInitialAdminAsync()
     {
-        var users = await _userRepo.GetAllAsync();
-        if (!users.Any(u => u.Role == UserRole.SuperAdmin))
+        if (!await _userRepo.ExistsAsync(u => u.Role == UserRole.SuperAdmin))
         {
             var admin = new AppUser
             {
@@ -142,7 +150,6 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Sub,  user.Id),
             new Claim(JwtRegisteredClaimNames.Name, user.FullName),
             new Claim(ClaimTypes.Role,              user.Role.ToString()),
-            new Claim("role",                       user.Role.ToString()),
             new Claim("siteId",                     user.SiteId ?? ""),
             new Claim(JwtRegisteredClaimNames.Jti,  Guid.NewGuid().ToString())
         };

@@ -3,15 +3,19 @@ using System.Text;
 using Asp.Versioning;
 using HPParkingAPI.Common;
 using HPParkingAPI.Data;
+using HPParkingAPI.Hubs;
 using HPParkingAPI.Repository;
 using HPParkingAPI.Repository.Interfaces;
 using HPParkingAPI.Services.Auth;
+using HPParkingAPI.Services.Devices;
+using HPParkingAPI.Services.Parking;
+using HPParkingAPI.Services.Personnel;
+using HPParkingAPI.Services.Subscription;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using MongoDB.Bson.Serialization.Conventions;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +47,20 @@ builder.Services.AddControllers()
         };
     });
 
+// Realtime SignalR Hub
+builder.Services.AddSignalR();
+
+// CORS Config
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // API Versioning
 var apiVersioningBuilder = builder.Services.AddApiVersioning(options =>
 {
@@ -66,7 +84,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "HPParkingAPI",
         Version = "v1",
-        Description = "Phiên bản 1 - API quản lý bãi đỗ xe"
+        Description = "Phiên bản 1 - API quản lý bãi đỗ xe & kiểm soát an ninh"
     });
 
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -96,9 +114,14 @@ var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConventio
 ConventionRegistry.Register("CamelCase", camelCaseConvention, type => true);
 builder.Services.AddSingleton<MongoDbContext>();
 
-// Service DI
+// Service DI Registrations
 builder.Services.AddScoped(typeof(IRepository<>), typeof(MongoRepository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IParkingTicketService, ParkingTicketService>();
+builder.Services.AddScoped<IPersonnelService, PersonnelService>();
+builder.Services.AddScoped<IMonthlySubscriptionService, MonthlySubscriptionService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["JwtSettings:SecretKey"]!;
@@ -170,15 +193,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.Use(async (context, next) =>
-{
-    var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-    Console.WriteLine($"\n[DEBUG REQ] {context.Request.Method} {context.Request.Path} -> Header Authorization: '{authHeader}'");
-    await next();
-});
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
-app.Run();
+app.MapHub<GateAccessHub>("/hubs/gate-access");
+
+app.Run();
